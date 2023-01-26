@@ -229,6 +229,10 @@ type DonutMoneyWithdrawErrorHandler = func(obj events.DonutMoneyWithdrawErrorObj
 
 type DonutMoneyWithdrawErrorMiddleware = func(obj events.DonutMoneyWithdrawErrorObject, client *api.VK) (bool, error)
 
+type AnyEventHandler = func(resp longpoll.Response, client *api.VK) error
+
+type AnyEventMiddleware = func(resp longpoll.Response, client *api.VK) (bool, error)
+
 type Watcher struct {
 	client  *api.VK
 	lp      *longpoll.LongPoll
@@ -1421,6 +1425,26 @@ func (w *Watcher) WatchDonutMoneyWithdrawError(handler DonutMoneyWithdrawErrorHa
 	})
 
 	return w
+}
+
+func (w *Watcher) WatchAny(handler AnyEventHandler, middlewares ...AnyEventMiddleware) {
+	w.lp.FullResponse(func(resp longpoll.Response) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(resp, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(resp, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
 }
 
 type MessageParams struct {
