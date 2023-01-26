@@ -1,7 +1,7 @@
 ## Installation
 Latest version
 ```shell
-go get github.com/Hand-of-Doom/vksdk-watcher@latest
+go get github.com/Hand-of-Doom/vksdk-watcher/v2@latest
 ```
 
 ### Usage
