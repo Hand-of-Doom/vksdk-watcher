@@ -17,11 +17,11 @@ w.HandleMessage(`say (?P<phrase>.*)`, func(ctx *watcher.MessageContext, client *
     return err
 })
 
-middleware := func(obj object.WallPostNewObject, client *api.VK) (bool, error) {
+middleware := func(obj events.WallPostNewObject, client *api.VK) (bool, error) {
     return obj.CreatedBy == 774840378, nil
 }
 
-w.WatchWallPostNew(func(obj object.WallPostNewObject, client *api.VK) error {
+w.WatchWallPostNew(func(obj events.WallPostNewObject, client *api.VK) error {
     p := params.NewMessagesSendBuilder().
         UserID(obj.CreatedBy).
         RandomID(0).
@@ -38,9 +38,7 @@ go startWatching()
 
 select {
 case err := <-chanErr:
-    if err != nil {
-        panic(err)
-    }
+    panic(err)
 }
 ```
 
@@ -48,19 +46,19 @@ case err := <-chanErr:
 ```go
 client := api.NewVK("")
 
-lp, err := longpoll.NewLongpollCommunity(client)
+lp, err := longpoll.NewLongPollCommunity(client)
 if err != nil {
     panic(err)
 }
 
 chanErr := make(chan error)
 
-lp.MessageNew(func(obj object.MessageNewObject, i int) {
+lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
     pattern := regexp.MustCompile(`say (?P<phrase>.*)`)
     if !pattern.MatchString(obj.Message.Text) {
         return
     }
-
+    
     phrasePos := pattern.SubexpIndex("phrase")
     matches := pattern.FindStringSubmatch(obj.Message.Text)
     phrase := matches[phrasePos]
@@ -74,11 +72,11 @@ lp.MessageNew(func(obj object.MessageNewObject, i int) {
     }
 })
 
-middleware := func(obj object.WallPostNewObject) (bool, error) {
+middleware := func(obj events.WallPostNewObject) (bool, error) {
     return obj.CreatedBy == 774840378, nil
 }
 
-lp.WallPostNew(func(obj object.WallPostNewObject, i int) {
+lp.WallPostNew(func(ctx context.Context, obj events.WallPostNewObject) {
     ok, err := middleware(obj)
     if err != nil {
         chanErr <- err
@@ -96,7 +94,7 @@ lp.WallPostNew(func(obj object.WallPostNewObject, i int) {
     }
 })
 
-lp.MessageNew(func(obj object.MessageNewObject, i int) {
+lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
     if obj.Message.Text != "throw error" {
         return
     }
