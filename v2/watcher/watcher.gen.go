@@ -1,9 +1,11 @@
 package watcher
 
 import (
-	"github.com/SevereCloud/vksdk/api"
-	"github.com/SevereCloud/vksdk/longpoll-bot"
-	"github.com/SevereCloud/vksdk/object"
+	"context"
+	"github.com/SevereCloud/vksdk/v2/api"
+	"github.com/SevereCloud/vksdk/v2/events"
+	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
+	"github.com/SevereCloud/vksdk/v2/object"
 	"log"
 	"regexp"
 	"strconv"
@@ -11,194 +13,230 @@ import (
 	"time"
 )
 
-type MessageNewHandler = func(obj object.MessageNewObject, client *api.VK) error
+type MessageNewHandler = func(obj events.MessageNewObject, client *api.VK) error
 
-type MessageNewMiddleware = func(obj object.MessageNewObject, client *api.VK) (bool, error)
+type MessageNewMiddleware = func(obj events.MessageNewObject, client *api.VK) (bool, error)
 
-type MessageReplyHandler = func(obj object.MessageReplyObject, client *api.VK) error
+type MessageReplyHandler = func(obj events.MessageReplyObject, client *api.VK) error
 
-type MessageReplyMiddleware = func(obj object.MessageReplyObject, client *api.VK) (bool, error)
+type MessageReplyMiddleware = func(obj events.MessageReplyObject, client *api.VK) (bool, error)
 
-type MessageEditHandler = func(obj object.MessageEditObject, client *api.VK) error
+type MessageEditHandler = func(obj events.MessageEditObject, client *api.VK) error
 
-type MessageEditMiddleware = func(obj object.MessageEditObject, client *api.VK) (bool, error)
+type MessageEditMiddleware = func(obj events.MessageEditObject, client *api.VK) (bool, error)
 
-type MessageAllowHandler = func(obj object.MessageAllowObject, client *api.VK) error
+type MessageAllowHandler = func(obj events.MessageAllowObject, client *api.VK) error
 
-type MessageAllowMiddleware = func(obj object.MessageAllowObject, client *api.VK) (bool, error)
+type MessageAllowMiddleware = func(obj events.MessageAllowObject, client *api.VK) (bool, error)
 
-type MessageDenyHandler = func(obj object.MessageDenyObject, client *api.VK) error
+type MessageDenyHandler = func(obj events.MessageDenyObject, client *api.VK) error
 
-type MessageDenyMiddleware = func(obj object.MessageDenyObject, client *api.VK) (bool, error)
+type MessageDenyMiddleware = func(obj events.MessageDenyObject, client *api.VK) (bool, error)
 
-type MessageTypingStateHandler = func(obj object.MessageTypingStateObject, client *api.VK) error
+type MessageTypingStateHandler = func(obj events.MessageTypingStateObject, client *api.VK) error
 
-type MessageTypingStateMiddleware = func(obj object.MessageTypingStateObject, client *api.VK) (bool, error)
+type MessageTypingStateMiddleware = func(obj events.MessageTypingStateObject, client *api.VK) (bool, error)
 
-type PhotoNewHandler = func(obj object.PhotoNewObject, client *api.VK) error
+type PhotoNewHandler = func(obj events.PhotoNewObject, client *api.VK) error
 
-type PhotoNewMiddleware = func(obj object.PhotoNewObject, client *api.VK) (bool, error)
+type PhotoNewMiddleware = func(obj events.PhotoNewObject, client *api.VK) (bool, error)
 
-type PhotoCommentNewHandler = func(obj object.PhotoCommentNewObject, client *api.VK) error
+type PhotoCommentNewHandler = func(obj events.PhotoCommentNewObject, client *api.VK) error
 
-type PhotoCommentNewMiddleware = func(obj object.PhotoCommentNewObject, client *api.VK) (bool, error)
+type PhotoCommentNewMiddleware = func(obj events.PhotoCommentNewObject, client *api.VK) (bool, error)
 
-type PhotoCommentEditHandler = func(obj object.PhotoCommentEditObject, client *api.VK) error
+type PhotoCommentEditHandler = func(obj events.PhotoCommentEditObject, client *api.VK) error
 
-type PhotoCommentEditMiddleware = func(obj object.PhotoCommentEditObject, client *api.VK) (bool, error)
+type PhotoCommentEditMiddleware = func(obj events.PhotoCommentEditObject, client *api.VK) (bool, error)
 
-type PhotoCommentRestoreHandler = func(obj object.PhotoCommentRestoreObject, client *api.VK) error
+type PhotoCommentRestoreHandler = func(obj events.PhotoCommentRestoreObject, client *api.VK) error
 
-type PhotoCommentRestoreMiddleware = func(obj object.PhotoCommentRestoreObject, client *api.VK) (bool, error)
+type PhotoCommentRestoreMiddleware = func(obj events.PhotoCommentRestoreObject, client *api.VK) (bool, error)
 
-type PhotoCommentDeleteHandler = func(obj object.PhotoCommentDeleteObject, client *api.VK) error
+type PhotoCommentDeleteHandler = func(obj events.PhotoCommentDeleteObject, client *api.VK) error
 
-type PhotoCommentDeleteMiddleware = func(obj object.PhotoCommentDeleteObject, client *api.VK) (bool, error)
+type PhotoCommentDeleteMiddleware = func(obj events.PhotoCommentDeleteObject, client *api.VK) (bool, error)
 
-type AudioNewHandler = func(obj object.AudioNewObject, client *api.VK) error
+type AudioNewHandler = func(obj events.AudioNewObject, client *api.VK) error
 
-type AudioNewMiddleware = func(obj object.AudioNewObject, client *api.VK) (bool, error)
+type AudioNewMiddleware = func(obj events.AudioNewObject, client *api.VK) (bool, error)
 
-type VideoNewHandler = func(obj object.VideoNewObject, client *api.VK) error
+type VideoNewHandler = func(obj events.VideoNewObject, client *api.VK) error
 
-type VideoNewMiddleware = func(obj object.VideoNewObject, client *api.VK) (bool, error)
+type VideoNewMiddleware = func(obj events.VideoNewObject, client *api.VK) (bool, error)
 
-type VideoCommentNewHandler = func(obj object.VideoCommentNewObject, client *api.VK) error
+type VideoCommentNewHandler = func(obj events.VideoCommentNewObject, client *api.VK) error
 
-type VideoCommentNewMiddleware = func(obj object.VideoCommentNewObject, client *api.VK) (bool, error)
+type VideoCommentNewMiddleware = func(obj events.VideoCommentNewObject, client *api.VK) (bool, error)
 
-type VideoCommentEditHandler = func(obj object.VideoCommentEditObject, client *api.VK) error
+type VideoCommentEditHandler = func(obj events.VideoCommentEditObject, client *api.VK) error
 
-type VideoCommentEditMiddleware = func(obj object.VideoCommentEditObject, client *api.VK) (bool, error)
+type VideoCommentEditMiddleware = func(obj events.VideoCommentEditObject, client *api.VK) (bool, error)
 
-type VideoCommentRestoreHandler = func(obj object.VideoCommentRestoreObject, client *api.VK) error
+type VideoCommentRestoreHandler = func(obj events.VideoCommentRestoreObject, client *api.VK) error
 
-type VideoCommentRestoreMiddleware = func(obj object.VideoCommentRestoreObject, client *api.VK) (bool, error)
+type VideoCommentRestoreMiddleware = func(obj events.VideoCommentRestoreObject, client *api.VK) (bool, error)
 
-type VideoCommentDeleteHandler = func(obj object.VideoCommentDeleteObject, client *api.VK) error
+type VideoCommentDeleteHandler = func(obj events.VideoCommentDeleteObject, client *api.VK) error
 
-type VideoCommentDeleteMiddleware = func(obj object.VideoCommentDeleteObject, client *api.VK) (bool, error)
+type VideoCommentDeleteMiddleware = func(obj events.VideoCommentDeleteObject, client *api.VK) (bool, error)
 
-type WallPostNewHandler = func(obj object.WallPostNewObject, client *api.VK) error
+type WallPostNewHandler = func(obj events.WallPostNewObject, client *api.VK) error
 
-type WallPostNewMiddleware = func(obj object.WallPostNewObject, client *api.VK) (bool, error)
+type WallPostNewMiddleware = func(obj events.WallPostNewObject, client *api.VK) (bool, error)
 
-type WallRepostHandler = func(obj object.WallRepostObject, client *api.VK) error
+type WallRepostHandler = func(obj events.WallRepostObject, client *api.VK) error
 
-type WallRepostMiddleware = func(obj object.WallRepostObject, client *api.VK) (bool, error)
+type WallRepostMiddleware = func(obj events.WallRepostObject, client *api.VK) (bool, error)
 
-type WallReplyNewHandler = func(obj object.WallReplyNewObject, client *api.VK) error
+type WallReplyNewHandler = func(obj events.WallReplyNewObject, client *api.VK) error
 
-type WallReplyNewMiddleware = func(obj object.WallReplyNewObject, client *api.VK) (bool, error)
+type WallReplyNewMiddleware = func(obj events.WallReplyNewObject, client *api.VK) (bool, error)
 
-type WallReplyEditHandler = func(obj object.WallReplyEditObject, client *api.VK) error
+type WallReplyEditHandler = func(obj events.WallReplyEditObject, client *api.VK) error
 
-type WallReplyEditMiddleware = func(obj object.WallReplyEditObject, client *api.VK) (bool, error)
+type WallReplyEditMiddleware = func(obj events.WallReplyEditObject, client *api.VK) (bool, error)
 
-type WallReplyRestoreHandler = func(obj object.WallReplyRestoreObject, client *api.VK) error
+type WallReplyRestoreHandler = func(obj events.WallReplyRestoreObject, client *api.VK) error
 
-type WallReplyRestoreMiddleware = func(obj object.WallReplyRestoreObject, client *api.VK) (bool, error)
+type WallReplyRestoreMiddleware = func(obj events.WallReplyRestoreObject, client *api.VK) (bool, error)
 
-type WallReplyDeleteHandler = func(obj object.WallReplyDeleteObject, client *api.VK) error
+type WallReplyDeleteHandler = func(obj events.WallReplyDeleteObject, client *api.VK) error
 
-type WallReplyDeleteMiddleware = func(obj object.WallReplyDeleteObject, client *api.VK) (bool, error)
+type WallReplyDeleteMiddleware = func(obj events.WallReplyDeleteObject, client *api.VK) (bool, error)
 
-type BoardPostNewHandler = func(obj object.BoardPostNewObject, client *api.VK) error
+type BoardPostNewHandler = func(obj events.BoardPostNewObject, client *api.VK) error
 
-type BoardPostNewMiddleware = func(obj object.BoardPostNewObject, client *api.VK) (bool, error)
+type BoardPostNewMiddleware = func(obj events.BoardPostNewObject, client *api.VK) (bool, error)
 
-type BoardPostEditHandler = func(obj object.BoardPostEditObject, client *api.VK) error
+type BoardPostEditHandler = func(obj events.BoardPostEditObject, client *api.VK) error
 
-type BoardPostEditMiddleware = func(obj object.BoardPostEditObject, client *api.VK) (bool, error)
+type BoardPostEditMiddleware = func(obj events.BoardPostEditObject, client *api.VK) (bool, error)
 
-type BoardPostRestoreHandler = func(obj object.BoardPostRestoreObject, client *api.VK) error
+type BoardPostRestoreHandler = func(obj events.BoardPostRestoreObject, client *api.VK) error
 
-type BoardPostRestoreMiddleware = func(obj object.BoardPostRestoreObject, client *api.VK) (bool, error)
+type BoardPostRestoreMiddleware = func(obj events.BoardPostRestoreObject, client *api.VK) (bool, error)
 
-type BoardPostDeleteHandler = func(obj object.BoardPostDeleteObject, client *api.VK) error
+type BoardPostDeleteHandler = func(obj events.BoardPostDeleteObject, client *api.VK) error
 
-type BoardPostDeleteMiddleware = func(obj object.BoardPostDeleteObject, client *api.VK) (bool, error)
+type BoardPostDeleteMiddleware = func(obj events.BoardPostDeleteObject, client *api.VK) (bool, error)
 
-type MarketCommentNewHandler = func(obj object.MarketCommentNewObject, client *api.VK) error
+type MarketCommentNewHandler = func(obj events.MarketCommentNewObject, client *api.VK) error
 
-type MarketCommentNewMiddleware = func(obj object.MarketCommentNewObject, client *api.VK) (bool, error)
+type MarketCommentNewMiddleware = func(obj events.MarketCommentNewObject, client *api.VK) (bool, error)
 
-type MarketCommentEditHandler = func(obj object.MarketCommentEditObject, client *api.VK) error
+type MarketCommentEditHandler = func(obj events.MarketCommentEditObject, client *api.VK) error
 
-type MarketCommentEditMiddleware = func(obj object.MarketCommentEditObject, client *api.VK) (bool, error)
+type MarketCommentEditMiddleware = func(obj events.MarketCommentEditObject, client *api.VK) (bool, error)
 
-type MarketCommentRestoreHandler = func(obj object.MarketCommentRestoreObject, client *api.VK) error
+type MarketCommentRestoreHandler = func(obj events.MarketCommentRestoreObject, client *api.VK) error
 
-type MarketCommentRestoreMiddleware = func(obj object.MarketCommentRestoreObject, client *api.VK) (bool, error)
+type MarketCommentRestoreMiddleware = func(obj events.MarketCommentRestoreObject, client *api.VK) (bool, error)
 
-type MarketCommentDeleteHandler = func(obj object.MarketCommentDeleteObject, client *api.VK) error
+type MarketCommentDeleteHandler = func(obj events.MarketCommentDeleteObject, client *api.VK) error
 
-type MarketCommentDeleteMiddleware = func(obj object.MarketCommentDeleteObject, client *api.VK) (bool, error)
+type MarketCommentDeleteMiddleware = func(obj events.MarketCommentDeleteObject, client *api.VK) (bool, error)
 
-type GroupLeaveHandler = func(obj object.GroupLeaveObject, client *api.VK) error
+type MarketOrderNewHandler = func(obj events.MarketOrderNewObject, client *api.VK) error
 
-type GroupLeaveMiddleware = func(obj object.GroupLeaveObject, client *api.VK) (bool, error)
+type MarketOrderNewMiddleware = func(obj events.MarketOrderNewObject, client *api.VK) (bool, error)
 
-type GroupJoinHandler = func(obj object.GroupJoinObject, client *api.VK) error
+type MarketOrderEditHandler = func(obj events.MarketOrderEditObject, client *api.VK) error
 
-type GroupJoinMiddleware = func(obj object.GroupJoinObject, client *api.VK) (bool, error)
+type MarketOrderEditMiddleware = func(obj events.MarketOrderEditObject, client *api.VK) (bool, error)
 
-type UserBlockHandler = func(obj object.UserBlockObject, client *api.VK) error
+type GroupLeaveHandler = func(obj events.GroupLeaveObject, client *api.VK) error
 
-type UserBlockMiddleware = func(obj object.UserBlockObject, client *api.VK) (bool, error)
+type GroupLeaveMiddleware = func(obj events.GroupLeaveObject, client *api.VK) (bool, error)
 
-type UserUnblockHandler = func(obj object.UserUnblockObject, client *api.VK) error
+type GroupJoinHandler = func(obj events.GroupJoinObject, client *api.VK) error
 
-type UserUnblockMiddleware = func(obj object.UserUnblockObject, client *api.VK) (bool, error)
+type GroupJoinMiddleware = func(obj events.GroupJoinObject, client *api.VK) (bool, error)
 
-type PollVoteNewHandler = func(obj object.PollVoteNewObject, client *api.VK) error
+type UserBlockHandler = func(obj events.UserBlockObject, client *api.VK) error
 
-type PollVoteNewMiddleware = func(obj object.PollVoteNewObject, client *api.VK) (bool, error)
+type UserBlockMiddleware = func(obj events.UserBlockObject, client *api.VK) (bool, error)
 
-type GroupOfficersEditHandler = func(obj object.GroupOfficersEditObject, client *api.VK) error
+type UserUnblockHandler = func(obj events.UserUnblockObject, client *api.VK) error
 
-type GroupOfficersEditMiddleware = func(obj object.GroupOfficersEditObject, client *api.VK) (bool, error)
+type UserUnblockMiddleware = func(obj events.UserUnblockObject, client *api.VK) (bool, error)
 
-type GroupChangeSettingsHandler = func(obj object.GroupChangeSettingsObject, client *api.VK) error
+type PollVoteNewHandler = func(obj events.PollVoteNewObject, client *api.VK) error
 
-type GroupChangeSettingsMiddleware = func(obj object.GroupChangeSettingsObject, client *api.VK) (bool, error)
+type PollVoteNewMiddleware = func(obj events.PollVoteNewObject, client *api.VK) (bool, error)
 
-type GroupChangePhotoHandler = func(obj object.GroupChangePhotoObject, client *api.VK) error
+type GroupOfficersEditHandler = func(obj events.GroupOfficersEditObject, client *api.VK) error
 
-type GroupChangePhotoMiddleware = func(obj object.GroupChangePhotoObject, client *api.VK) (bool, error)
+type GroupOfficersEditMiddleware = func(obj events.GroupOfficersEditObject, client *api.VK) (bool, error)
 
-type VkpayTransactionHandler = func(obj object.VkpayTransactionObject, client *api.VK) error
+type GroupChangeSettingsHandler = func(obj events.GroupChangeSettingsObject, client *api.VK) error
 
-type VkpayTransactionMiddleware = func(obj object.VkpayTransactionObject, client *api.VK) (bool, error)
+type GroupChangeSettingsMiddleware = func(obj events.GroupChangeSettingsObject, client *api.VK) (bool, error)
 
-type LeadFormsNewHandler = func(obj object.LeadFormsNewObject, client *api.VK) error
+type GroupChangePhotoHandler = func(obj events.GroupChangePhotoObject, client *api.VK) error
 
-type LeadFormsNewMiddleware = func(obj object.LeadFormsNewObject, client *api.VK) (bool, error)
+type GroupChangePhotoMiddleware = func(obj events.GroupChangePhotoObject, client *api.VK) (bool, error)
 
-type AppPayloadHandler = func(obj object.AppPayloadObject, client *api.VK) error
+type VkpayTransactionHandler = func(obj events.VkpayTransactionObject, client *api.VK) error
 
-type AppPayloadMiddleware = func(obj object.AppPayloadObject, client *api.VK) (bool, error)
+type VkpayTransactionMiddleware = func(obj events.VkpayTransactionObject, client *api.VK) (bool, error)
 
-type MessageReadHandler = func(obj object.MessageReadObject, client *api.VK) error
+type LeadFormsNewHandler = func(obj events.LeadFormsNewObject, client *api.VK) error
 
-type MessageReadMiddleware = func(obj object.MessageReadObject, client *api.VK) (bool, error)
+type LeadFormsNewMiddleware = func(obj events.LeadFormsNewObject, client *api.VK) (bool, error)
 
-type LikeAddHandler = func(obj object.LikeAddObject, client *api.VK) error
+type AppPayloadHandler = func(obj events.AppPayloadObject, client *api.VK) error
 
-type LikeAddMiddleware = func(obj object.LikeAddObject, client *api.VK) (bool, error)
+type AppPayloadMiddleware = func(obj events.AppPayloadObject, client *api.VK) (bool, error)
 
-type LikeRemoveHandler = func(obj object.LikeRemoveObject, client *api.VK) error
+type MessageReadHandler = func(obj events.MessageReadObject, client *api.VK) error
 
-type LikeRemoveMiddleware = func(obj object.LikeRemoveObject, client *api.VK) (bool, error)
+type MessageReadMiddleware = func(obj events.MessageReadObject, client *api.VK) (bool, error)
+
+type LikeAddHandler = func(obj events.LikeAddObject, client *api.VK) error
+
+type LikeAddMiddleware = func(obj events.LikeAddObject, client *api.VK) (bool, error)
+
+type LikeRemoveHandler = func(obj events.LikeRemoveObject, client *api.VK) error
+
+type LikeRemoveMiddleware = func(obj events.LikeRemoveObject, client *api.VK) (bool, error)
+
+type DonutSubscriptionCreateHandler = func(obj events.DonutSubscriptionCreateObject, client *api.VK) error
+
+type DonutSubscriptionCreateMiddleware = func(obj events.DonutSubscriptionCreateObject, client *api.VK) (bool, error)
+
+type DonutSubscriptionProlongedHandler = func(obj events.DonutSubscriptionProlongedObject, client *api.VK) error
+
+type DonutSubscriptionProlongedMiddleware = func(obj events.DonutSubscriptionProlongedObject, client *api.VK) (bool, error)
+
+type DonutSubscriptionExpiredHandler = func(obj events.DonutSubscriptionExpiredObject, client *api.VK) error
+
+type DonutSubscriptionExpiredMiddleware = func(obj events.DonutSubscriptionExpiredObject, client *api.VK) (bool, error)
+
+type DonutSubscriptionCancelledHandler = func(obj events.DonutSubscriptionCancelledObject, client *api.VK) error
+
+type DonutSubscriptionCancelledMiddleware = func(obj events.DonutSubscriptionCancelledObject, client *api.VK) (bool, error)
+
+type DonutSubscriptionPriceChangedHandler = func(obj events.DonutSubscriptionPriceChangedObject, client *api.VK) error
+
+type DonutSubscriptionPriceChangedMiddleware = func(obj events.DonutSubscriptionPriceChangedObject, client *api.VK) (bool, error)
+
+type DonutMoneyWithdrawHandler = func(obj events.DonutMoneyWithdrawObject, client *api.VK) error
+
+type DonutMoneyWithdrawMiddleware = func(obj events.DonutMoneyWithdrawObject, client *api.VK) (bool, error)
+
+type DonutMoneyWithdrawErrorHandler = func(obj events.DonutMoneyWithdrawErrorObject, client *api.VK) error
+
+type DonutMoneyWithdrawErrorMiddleware = func(obj events.DonutMoneyWithdrawErrorObject, client *api.VK) (bool, error)
 
 type Watcher struct {
 	client  *api.VK
-	lp      *longpoll.Longpoll
+	lp      *longpoll.LongPoll
 	chanErr chan error
 }
 
 func (w *Watcher) WatchMessageNew(handler MessageNewHandler, middlewares ...MessageNewMiddleware) *Watcher {
-	w.lp.MessageNew(func(obj object.MessageNewObject, i int) {
+	w.lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -220,7 +258,7 @@ func (w *Watcher) WatchMessageNew(handler MessageNewHandler, middlewares ...Mess
 }
 
 func (w *Watcher) WatchMessageReply(handler MessageReplyHandler, middlewares ...MessageReplyMiddleware) *Watcher {
-	w.lp.MessageReply(func(obj object.MessageReplyObject, i int) {
+	w.lp.MessageReply(func(ctx context.Context, obj events.MessageReplyObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -242,7 +280,7 @@ func (w *Watcher) WatchMessageReply(handler MessageReplyHandler, middlewares ...
 }
 
 func (w *Watcher) WatchMessageEdit(handler MessageEditHandler, middlewares ...MessageEditMiddleware) *Watcher {
-	w.lp.MessageEdit(func(obj object.MessageEditObject, i int) {
+	w.lp.MessageEdit(func(ctx context.Context, obj events.MessageEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -264,7 +302,7 @@ func (w *Watcher) WatchMessageEdit(handler MessageEditHandler, middlewares ...Me
 }
 
 func (w *Watcher) WatchMessageAllow(handler MessageAllowHandler, middlewares ...MessageAllowMiddleware) *Watcher {
-	w.lp.MessageAllow(func(obj object.MessageAllowObject, i int) {
+	w.lp.MessageAllow(func(ctx context.Context, obj events.MessageAllowObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -286,7 +324,7 @@ func (w *Watcher) WatchMessageAllow(handler MessageAllowHandler, middlewares ...
 }
 
 func (w *Watcher) WatchMessageDeny(handler MessageDenyHandler, middlewares ...MessageDenyMiddleware) *Watcher {
-	w.lp.MessageDeny(func(obj object.MessageDenyObject, i int) {
+	w.lp.MessageDeny(func(ctx context.Context, obj events.MessageDenyObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -308,7 +346,7 @@ func (w *Watcher) WatchMessageDeny(handler MessageDenyHandler, middlewares ...Me
 }
 
 func (w *Watcher) WatchMessageTypingState(handler MessageTypingStateHandler, middlewares ...MessageTypingStateMiddleware) *Watcher {
-	w.lp.MessageTypingState(func(obj object.MessageTypingStateObject, i int) {
+	w.lp.MessageTypingState(func(ctx context.Context, obj events.MessageTypingStateObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -330,7 +368,7 @@ func (w *Watcher) WatchMessageTypingState(handler MessageTypingStateHandler, mid
 }
 
 func (w *Watcher) WatchPhotoNew(handler PhotoNewHandler, middlewares ...PhotoNewMiddleware) *Watcher {
-	w.lp.PhotoNew(func(obj object.PhotoNewObject, i int) {
+	w.lp.PhotoNew(func(ctx context.Context, obj events.PhotoNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -352,7 +390,7 @@ func (w *Watcher) WatchPhotoNew(handler PhotoNewHandler, middlewares ...PhotoNew
 }
 
 func (w *Watcher) WatchPhotoCommentNew(handler PhotoCommentNewHandler, middlewares ...PhotoCommentNewMiddleware) *Watcher {
-	w.lp.PhotoCommentNew(func(obj object.PhotoCommentNewObject, i int) {
+	w.lp.PhotoCommentNew(func(ctx context.Context, obj events.PhotoCommentNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -374,7 +412,7 @@ func (w *Watcher) WatchPhotoCommentNew(handler PhotoCommentNewHandler, middlewar
 }
 
 func (w *Watcher) WatchPhotoCommentEdit(handler PhotoCommentEditHandler, middlewares ...PhotoCommentEditMiddleware) *Watcher {
-	w.lp.PhotoCommentEdit(func(obj object.PhotoCommentEditObject, i int) {
+	w.lp.PhotoCommentEdit(func(ctx context.Context, obj events.PhotoCommentEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -396,7 +434,7 @@ func (w *Watcher) WatchPhotoCommentEdit(handler PhotoCommentEditHandler, middlew
 }
 
 func (w *Watcher) WatchPhotoCommentRestore(handler PhotoCommentRestoreHandler, middlewares ...PhotoCommentRestoreMiddleware) *Watcher {
-	w.lp.PhotoCommentRestore(func(obj object.PhotoCommentRestoreObject, i int) {
+	w.lp.PhotoCommentRestore(func(ctx context.Context, obj events.PhotoCommentRestoreObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -418,7 +456,7 @@ func (w *Watcher) WatchPhotoCommentRestore(handler PhotoCommentRestoreHandler, m
 }
 
 func (w *Watcher) WatchPhotoCommentDelete(handler PhotoCommentDeleteHandler, middlewares ...PhotoCommentDeleteMiddleware) *Watcher {
-	w.lp.PhotoCommentDelete(func(obj object.PhotoCommentDeleteObject, i int) {
+	w.lp.PhotoCommentDelete(func(ctx context.Context, obj events.PhotoCommentDeleteObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -440,7 +478,7 @@ func (w *Watcher) WatchPhotoCommentDelete(handler PhotoCommentDeleteHandler, mid
 }
 
 func (w *Watcher) WatchAudioNew(handler AudioNewHandler, middlewares ...AudioNewMiddleware) *Watcher {
-	w.lp.AudioNew(func(obj object.AudioNewObject, i int) {
+	w.lp.AudioNew(func(ctx context.Context, obj events.AudioNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -462,7 +500,7 @@ func (w *Watcher) WatchAudioNew(handler AudioNewHandler, middlewares ...AudioNew
 }
 
 func (w *Watcher) WatchVideoNew(handler VideoNewHandler, middlewares ...VideoNewMiddleware) *Watcher {
-	w.lp.VideoNew(func(obj object.VideoNewObject, i int) {
+	w.lp.VideoNew(func(ctx context.Context, obj events.VideoNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -484,7 +522,7 @@ func (w *Watcher) WatchVideoNew(handler VideoNewHandler, middlewares ...VideoNew
 }
 
 func (w *Watcher) WatchVideoCommentNew(handler VideoCommentNewHandler, middlewares ...VideoCommentNewMiddleware) *Watcher {
-	w.lp.VideoCommentNew(func(obj object.VideoCommentNewObject, i int) {
+	w.lp.VideoCommentNew(func(ctx context.Context, obj events.VideoCommentNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -506,7 +544,7 @@ func (w *Watcher) WatchVideoCommentNew(handler VideoCommentNewHandler, middlewar
 }
 
 func (w *Watcher) WatchVideoCommentEdit(handler VideoCommentEditHandler, middlewares ...VideoCommentEditMiddleware) *Watcher {
-	w.lp.VideoCommentEdit(func(obj object.VideoCommentEditObject, i int) {
+	w.lp.VideoCommentEdit(func(ctx context.Context, obj events.VideoCommentEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -528,7 +566,7 @@ func (w *Watcher) WatchVideoCommentEdit(handler VideoCommentEditHandler, middlew
 }
 
 func (w *Watcher) WatchVideoCommentRestore(handler VideoCommentRestoreHandler, middlewares ...VideoCommentRestoreMiddleware) *Watcher {
-	w.lp.VideoCommentRestore(func(obj object.VideoCommentRestoreObject, i int) {
+	w.lp.VideoCommentRestore(func(ctx context.Context, obj events.VideoCommentRestoreObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -550,7 +588,7 @@ func (w *Watcher) WatchVideoCommentRestore(handler VideoCommentRestoreHandler, m
 }
 
 func (w *Watcher) WatchVideoCommentDelete(handler VideoCommentDeleteHandler, middlewares ...VideoCommentDeleteMiddleware) *Watcher {
-	w.lp.VideoCommentDelete(func(obj object.VideoCommentDeleteObject, i int) {
+	w.lp.VideoCommentDelete(func(ctx context.Context, obj events.VideoCommentDeleteObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -572,7 +610,7 @@ func (w *Watcher) WatchVideoCommentDelete(handler VideoCommentDeleteHandler, mid
 }
 
 func (w *Watcher) WatchWallPostNew(handler WallPostNewHandler, middlewares ...WallPostNewMiddleware) *Watcher {
-	w.lp.WallPostNew(func(obj object.WallPostNewObject, i int) {
+	w.lp.WallPostNew(func(ctx context.Context, obj events.WallPostNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -594,7 +632,7 @@ func (w *Watcher) WatchWallPostNew(handler WallPostNewHandler, middlewares ...Wa
 }
 
 func (w *Watcher) WatchWallRepost(handler WallRepostHandler, middlewares ...WallRepostMiddleware) *Watcher {
-	w.lp.WallRepost(func(obj object.WallRepostObject, i int) {
+	w.lp.WallRepost(func(ctx context.Context, obj events.WallRepostObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -616,7 +654,7 @@ func (w *Watcher) WatchWallRepost(handler WallRepostHandler, middlewares ...Wall
 }
 
 func (w *Watcher) WatchWallReplyNew(handler WallReplyNewHandler, middlewares ...WallReplyNewMiddleware) *Watcher {
-	w.lp.WallReplyNew(func(obj object.WallReplyNewObject, i int) {
+	w.lp.WallReplyNew(func(ctx context.Context, obj events.WallReplyNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -638,7 +676,7 @@ func (w *Watcher) WatchWallReplyNew(handler WallReplyNewHandler, middlewares ...
 }
 
 func (w *Watcher) WatchWallReplyEdit(handler WallReplyEditHandler, middlewares ...WallReplyEditMiddleware) *Watcher {
-	w.lp.WallReplyEdit(func(obj object.WallReplyEditObject, i int) {
+	w.lp.WallReplyEdit(func(ctx context.Context, obj events.WallReplyEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -660,7 +698,7 @@ func (w *Watcher) WatchWallReplyEdit(handler WallReplyEditHandler, middlewares .
 }
 
 func (w *Watcher) WatchWallReplyRestore(handler WallReplyRestoreHandler, middlewares ...WallReplyRestoreMiddleware) *Watcher {
-	w.lp.WallReplyRestore(func(obj object.WallReplyRestoreObject, i int) {
+	w.lp.WallReplyRestore(func(ctx context.Context, obj events.WallReplyRestoreObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -682,7 +720,7 @@ func (w *Watcher) WatchWallReplyRestore(handler WallReplyRestoreHandler, middlew
 }
 
 func (w *Watcher) WatchWallReplyDelete(handler WallReplyDeleteHandler, middlewares ...WallReplyDeleteMiddleware) *Watcher {
-	w.lp.WallReplyDelete(func(obj object.WallReplyDeleteObject, i int) {
+	w.lp.WallReplyDelete(func(ctx context.Context, obj events.WallReplyDeleteObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -704,7 +742,7 @@ func (w *Watcher) WatchWallReplyDelete(handler WallReplyDeleteHandler, middlewar
 }
 
 func (w *Watcher) WatchBoardPostNew(handler BoardPostNewHandler, middlewares ...BoardPostNewMiddleware) *Watcher {
-	w.lp.BoardPostNew(func(obj object.BoardPostNewObject, i int) {
+	w.lp.BoardPostNew(func(ctx context.Context, obj events.BoardPostNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -726,7 +764,7 @@ func (w *Watcher) WatchBoardPostNew(handler BoardPostNewHandler, middlewares ...
 }
 
 func (w *Watcher) WatchBoardPostEdit(handler BoardPostEditHandler, middlewares ...BoardPostEditMiddleware) *Watcher {
-	w.lp.BoardPostEdit(func(obj object.BoardPostEditObject, i int) {
+	w.lp.BoardPostEdit(func(ctx context.Context, obj events.BoardPostEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -748,7 +786,7 @@ func (w *Watcher) WatchBoardPostEdit(handler BoardPostEditHandler, middlewares .
 }
 
 func (w *Watcher) WatchBoardPostRestore(handler BoardPostRestoreHandler, middlewares ...BoardPostRestoreMiddleware) *Watcher {
-	w.lp.BoardPostRestore(func(obj object.BoardPostRestoreObject, i int) {
+	w.lp.BoardPostRestore(func(ctx context.Context, obj events.BoardPostRestoreObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -770,7 +808,7 @@ func (w *Watcher) WatchBoardPostRestore(handler BoardPostRestoreHandler, middlew
 }
 
 func (w *Watcher) WatchBoardPostDelete(handler BoardPostDeleteHandler, middlewares ...BoardPostDeleteMiddleware) *Watcher {
-	w.lp.BoardPostDelete(func(obj object.BoardPostDeleteObject, i int) {
+	w.lp.BoardPostDelete(func(ctx context.Context, obj events.BoardPostDeleteObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -792,7 +830,7 @@ func (w *Watcher) WatchBoardPostDelete(handler BoardPostDeleteHandler, middlewar
 }
 
 func (w *Watcher) WatchMarketCommentNew(handler MarketCommentNewHandler, middlewares ...MarketCommentNewMiddleware) *Watcher {
-	w.lp.MarketCommentNew(func(obj object.MarketCommentNewObject, i int) {
+	w.lp.MarketCommentNew(func(ctx context.Context, obj events.MarketCommentNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -814,7 +852,7 @@ func (w *Watcher) WatchMarketCommentNew(handler MarketCommentNewHandler, middlew
 }
 
 func (w *Watcher) WatchMarketCommentEdit(handler MarketCommentEditHandler, middlewares ...MarketCommentEditMiddleware) *Watcher {
-	w.lp.MarketCommentEdit(func(obj object.MarketCommentEditObject, i int) {
+	w.lp.MarketCommentEdit(func(ctx context.Context, obj events.MarketCommentEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -836,7 +874,7 @@ func (w *Watcher) WatchMarketCommentEdit(handler MarketCommentEditHandler, middl
 }
 
 func (w *Watcher) WatchMarketCommentRestore(handler MarketCommentRestoreHandler, middlewares ...MarketCommentRestoreMiddleware) *Watcher {
-	w.lp.MarketCommentRestore(func(obj object.MarketCommentRestoreObject, i int) {
+	w.lp.MarketCommentRestore(func(ctx context.Context, obj events.MarketCommentRestoreObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -858,7 +896,51 @@ func (w *Watcher) WatchMarketCommentRestore(handler MarketCommentRestoreHandler,
 }
 
 func (w *Watcher) WatchMarketCommentDelete(handler MarketCommentDeleteHandler, middlewares ...MarketCommentDeleteMiddleware) *Watcher {
-	w.lp.MarketCommentDelete(func(obj object.MarketCommentDeleteObject, i int) {
+	w.lp.MarketCommentDelete(func(ctx context.Context, obj events.MarketCommentDeleteObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchMarketOrderNew(handler MarketOrderNewHandler, middlewares ...MarketOrderNewMiddleware) *Watcher {
+	w.lp.MarketOrderNew(func(ctx context.Context, obj events.MarketOrderNewObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchMarketOrderEdit(handler MarketOrderEditHandler, middlewares ...MarketOrderEditMiddleware) *Watcher {
+	w.lp.MarketOrderEdit(func(ctx context.Context, obj events.MarketOrderEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -880,7 +962,7 @@ func (w *Watcher) WatchMarketCommentDelete(handler MarketCommentDeleteHandler, m
 }
 
 func (w *Watcher) WatchGroupLeave(handler GroupLeaveHandler, middlewares ...GroupLeaveMiddleware) *Watcher {
-	w.lp.GroupLeave(func(obj object.GroupLeaveObject, i int) {
+	w.lp.GroupLeave(func(ctx context.Context, obj events.GroupLeaveObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -902,7 +984,7 @@ func (w *Watcher) WatchGroupLeave(handler GroupLeaveHandler, middlewares ...Grou
 }
 
 func (w *Watcher) WatchGroupJoin(handler GroupJoinHandler, middlewares ...GroupJoinMiddleware) *Watcher {
-	w.lp.GroupJoin(func(obj object.GroupJoinObject, i int) {
+	w.lp.GroupJoin(func(ctx context.Context, obj events.GroupJoinObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -924,7 +1006,7 @@ func (w *Watcher) WatchGroupJoin(handler GroupJoinHandler, middlewares ...GroupJ
 }
 
 func (w *Watcher) WatchUserBlock(handler UserBlockHandler, middlewares ...UserBlockMiddleware) *Watcher {
-	w.lp.UserBlock(func(obj object.UserBlockObject, i int) {
+	w.lp.UserBlock(func(ctx context.Context, obj events.UserBlockObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -946,7 +1028,7 @@ func (w *Watcher) WatchUserBlock(handler UserBlockHandler, middlewares ...UserBl
 }
 
 func (w *Watcher) WatchUserUnblock(handler UserUnblockHandler, middlewares ...UserUnblockMiddleware) *Watcher {
-	w.lp.UserUnblock(func(obj object.UserUnblockObject, i int) {
+	w.lp.UserUnblock(func(ctx context.Context, obj events.UserUnblockObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -968,7 +1050,7 @@ func (w *Watcher) WatchUserUnblock(handler UserUnblockHandler, middlewares ...Us
 }
 
 func (w *Watcher) WatchPollVoteNew(handler PollVoteNewHandler, middlewares ...PollVoteNewMiddleware) *Watcher {
-	w.lp.PollVoteNew(func(obj object.PollVoteNewObject, i int) {
+	w.lp.PollVoteNew(func(ctx context.Context, obj events.PollVoteNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -990,7 +1072,7 @@ func (w *Watcher) WatchPollVoteNew(handler PollVoteNewHandler, middlewares ...Po
 }
 
 func (w *Watcher) WatchGroupOfficersEdit(handler GroupOfficersEditHandler, middlewares ...GroupOfficersEditMiddleware) *Watcher {
-	w.lp.GroupOfficersEdit(func(obj object.GroupOfficersEditObject, i int) {
+	w.lp.GroupOfficersEdit(func(ctx context.Context, obj events.GroupOfficersEditObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1012,7 +1094,7 @@ func (w *Watcher) WatchGroupOfficersEdit(handler GroupOfficersEditHandler, middl
 }
 
 func (w *Watcher) WatchGroupChangeSettings(handler GroupChangeSettingsHandler, middlewares ...GroupChangeSettingsMiddleware) *Watcher {
-	w.lp.GroupChangeSettings(func(obj object.GroupChangeSettingsObject, i int) {
+	w.lp.GroupChangeSettings(func(ctx context.Context, obj events.GroupChangeSettingsObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1034,7 +1116,7 @@ func (w *Watcher) WatchGroupChangeSettings(handler GroupChangeSettingsHandler, m
 }
 
 func (w *Watcher) WatchGroupChangePhoto(handler GroupChangePhotoHandler, middlewares ...GroupChangePhotoMiddleware) *Watcher {
-	w.lp.GroupChangePhoto(func(obj object.GroupChangePhotoObject, i int) {
+	w.lp.GroupChangePhoto(func(ctx context.Context, obj events.GroupChangePhotoObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1056,7 +1138,7 @@ func (w *Watcher) WatchGroupChangePhoto(handler GroupChangePhotoHandler, middlew
 }
 
 func (w *Watcher) WatchVkpayTransaction(handler VkpayTransactionHandler, middlewares ...VkpayTransactionMiddleware) *Watcher {
-	w.lp.VkpayTransaction(func(obj object.VkpayTransactionObject, i int) {
+	w.lp.VkpayTransaction(func(ctx context.Context, obj events.VkpayTransactionObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1078,7 +1160,7 @@ func (w *Watcher) WatchVkpayTransaction(handler VkpayTransactionHandler, middlew
 }
 
 func (w *Watcher) WatchLeadFormsNew(handler LeadFormsNewHandler, middlewares ...LeadFormsNewMiddleware) *Watcher {
-	w.lp.LeadFormsNew(func(obj object.LeadFormsNewObject, i int) {
+	w.lp.LeadFormsNew(func(ctx context.Context, obj events.LeadFormsNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1100,7 +1182,7 @@ func (w *Watcher) WatchLeadFormsNew(handler LeadFormsNewHandler, middlewares ...
 }
 
 func (w *Watcher) WatchAppPayload(handler AppPayloadHandler, middlewares ...AppPayloadMiddleware) *Watcher {
-	w.lp.AppPayload(func(obj object.AppPayloadObject, i int) {
+	w.lp.AppPayload(func(ctx context.Context, obj events.AppPayloadObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1122,7 +1204,7 @@ func (w *Watcher) WatchAppPayload(handler AppPayloadHandler, middlewares ...AppP
 }
 
 func (w *Watcher) WatchMessageRead(handler MessageReadHandler, middlewares ...MessageReadMiddleware) *Watcher {
-	w.lp.MessageRead(func(obj object.MessageReadObject, i int) {
+	w.lp.MessageRead(func(ctx context.Context, obj events.MessageReadObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1144,7 +1226,7 @@ func (w *Watcher) WatchMessageRead(handler MessageReadHandler, middlewares ...Me
 }
 
 func (w *Watcher) WatchLikeAdd(handler LikeAddHandler, middlewares ...LikeAddMiddleware) *Watcher {
-	w.lp.LikeAdd(func(obj object.LikeAddObject, i int) {
+	w.lp.LikeAdd(func(ctx context.Context, obj events.LikeAddObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1166,7 +1248,161 @@ func (w *Watcher) WatchLikeAdd(handler LikeAddHandler, middlewares ...LikeAddMid
 }
 
 func (w *Watcher) WatchLikeRemove(handler LikeRemoveHandler, middlewares ...LikeRemoveMiddleware) *Watcher {
-	w.lp.LikeRemove(func(obj object.LikeRemoveObject, i int) {
+	w.lp.LikeRemove(func(ctx context.Context, obj events.LikeRemoveObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutSubscriptionCreate(handler DonutSubscriptionCreateHandler, middlewares ...DonutSubscriptionCreateMiddleware) *Watcher {
+	w.lp.DonutSubscriptionCreate(func(ctx context.Context, obj events.DonutSubscriptionCreateObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutSubscriptionProlonged(handler DonutSubscriptionProlongedHandler, middlewares ...DonutSubscriptionProlongedMiddleware) *Watcher {
+	w.lp.DonutSubscriptionProlonged(func(ctx context.Context, obj events.DonutSubscriptionProlongedObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutSubscriptionExpired(handler DonutSubscriptionExpiredHandler, middlewares ...DonutSubscriptionExpiredMiddleware) *Watcher {
+	w.lp.DonutSubscriptionExpired(func(ctx context.Context, obj events.DonutSubscriptionExpiredObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutSubscriptionCancelled(handler DonutSubscriptionCancelledHandler, middlewares ...DonutSubscriptionCancelledMiddleware) *Watcher {
+	w.lp.DonutSubscriptionCancelled(func(ctx context.Context, obj events.DonutSubscriptionCancelledObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutSubscriptionPriceChanged(handler DonutSubscriptionPriceChangedHandler, middlewares ...DonutSubscriptionPriceChangedMiddleware) *Watcher {
+	w.lp.DonutSubscriptionPriceChanged(func(ctx context.Context, obj events.DonutSubscriptionPriceChangedObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutMoneyWithdraw(handler DonutMoneyWithdrawHandler, middlewares ...DonutMoneyWithdrawMiddleware) *Watcher {
+	w.lp.DonutMoneyWithdraw(func(ctx context.Context, obj events.DonutMoneyWithdrawObject) {
+		for _, middleware := range middlewares {
+			ok, err := middleware(obj, w.client)
+			if err != nil {
+				w.chanErr <- err
+				return
+			}
+			if !ok {
+				return
+			}
+		}
+
+		err := handler(obj, w.client)
+		if err != nil {
+			w.chanErr <- err
+		}
+	})
+
+	return w
+}
+
+func (w *Watcher) WatchDonutMoneyWithdrawError(handler DonutMoneyWithdrawErrorHandler, middlewares ...DonutMoneyWithdrawErrorMiddleware) *Watcher {
+	w.lp.DonutMoneyWithdrawError(func(ctx context.Context, obj events.DonutMoneyWithdrawErrorObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1600,7 +1836,7 @@ type MessageNewHandlerExtended = func(ctx *MessageContext, client *api.VK) error
 func (w *Watcher) HandleMessage(pattern string, handler MessageNewHandlerExtended, middlewares ...MessageNewMiddleware) *Watcher {
 	regexpMessageText := regexp.MustCompile(pattern)
 
-	w.lp.MessageNew(func(obj object.MessageNewObject, i int) {
+	w.lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
 		for _, middleware := range middlewares {
 			ok, err := middleware(obj, w.client)
 			if err != nil {
@@ -1635,12 +1871,12 @@ func NewWatcher(client *api.VK, chanErr chan error) (*Watcher, StartWatcherFunc)
 	w.chanErr = chanErr
 	w.client = client
 
-	lp, err := longpoll.NewLongpollCommunity(client)
+	lp, err := longpoll.NewLongPollCommunity(client)
 	if err != nil {
 		chanErr <- err
 		return nil, nil
 	}
-	lp.FullResponse(func(response object.LongpollBotResponse) {
+	lp.FullResponse(func(response longpoll.Response) {
 		log.Println(response)
 	})
 
