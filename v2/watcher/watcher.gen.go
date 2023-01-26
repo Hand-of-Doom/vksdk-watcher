@@ -2,11 +2,11 @@ package watcher
 
 import (
 	"context"
+	"fmt"
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
 	"github.com/SevereCloud/vksdk/v2/object"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -1890,7 +1890,7 @@ func (w *Watcher) HandleMessage(pattern string, handler MessageNewHandlerExtende
 
 type StartWatcherFunc func()
 
-func NewWatcher(client *api.VK, chanErr chan error) (*Watcher, StartWatcherFunc) {
+func NewWatcher(client *api.VK, chanErr chan error, debugOptional ...bool) (*Watcher, StartWatcherFunc) {
 	w := new(Watcher)
 	w.chanErr = chanErr
 	w.client = client
@@ -1900,9 +1900,13 @@ func NewWatcher(client *api.VK, chanErr chan error) (*Watcher, StartWatcherFunc)
 		chanErr <- err
 		return nil, nil
 	}
-	lp.FullResponse(func(response longpoll.Response) {
-		log.Println(response)
-	})
+	if len(debugOptional) != 0 && debugOptional[0] == true {
+		lp.FullResponse(func(response longpoll.Response) {
+			for _, upd := range response.Updates {
+				fmt.Printf("Event: %s, Object: %s, Api version: %s\n", upd.Type, upd.Object, upd.V)
+			}
+		})
+	}
 
 	w.lp = lp
 
